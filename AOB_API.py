@@ -1,9 +1,15 @@
 import requests
-import pandas as pd
 
-
+'''
+an asset group is the interface class for any group of assets (watchlist, portfolio,...)
+'''
 class AssetGroup:
     def __init__(self, asset_group, endpoint='https://api.alphaoverbeta.net/'):
+        '''
+        initialize the asset group
+        :param asset_group: string representing the group of assets 'must be the same as the one in the backend
+        :param endpoint: url of endpoint, may be local (testing) alphaoverbeta is the default
+        '''
         self.endpoint = endpoint
         self.asset_group = asset_group
         self._id = None
@@ -21,6 +27,14 @@ class AssetGroup:
         return r.status_code
 
     def _step(self, key, secret, params, method='POST'):
+        '''
+        internal method executing the request to the backend
+        :param key: the key string
+        :param secret: the secret string
+        :param params: dictionary containing the values for the endpoint params
+        :param method: POST,GET
+        :return: response string and status code (must be 200 for succesfull requests)
+        '''
         session = requests.Session()
         session.auth = (key, secret)
         _params = ''
@@ -34,116 +48,84 @@ class AssetGroup:
 
         return r.text, r.status_code
 
+    def create(self,key, secret):
+        '''
+        create an asset group AFTER signup , use key and secret sent in the signup email
+        :param key: the key string sent after signup
+        :param secret: the secret string sent after signup
+        :return: id to be used later for managing the watchlist (add, remove,...)
+        '''
+        self._id, _ = self._step(key=key, secret=secret, params={'step':'create'})
 
+    def add(self, key, secret, symbol, kwargs=None):
+        '''
+        add a stock to the group, you must have an id created when calling create
+        :param key: the key string sent after signup
+        :param secret: the secret string sent after signup
+        :param symbol: the symbol to add to the watchlist
+        :return: status code
+        '''
+        assert self._id is not None
+        params = {'id': self._id, 'step': 'add', 'symbol': symbol}
+        if kwargs is not None:
+            params.update(kwargs)
+        return self._step(key=key, secret=secret, params=params)
+
+    def remove(self, key, secret, symbol):
+        '''
+        remove a stock form the group, you must have an id created when calling remove
+        :param key: the key string sent after signup
+        :param secret: the secret string sent after signup
+        :param symbol: the symbol to add to the group
+        :return: status code
+        '''
+        assert self._id is not None
+        return self._step(key=key, secret=secret, params={'id':self._id, 'step': 'remove','symbol':symbol})
+
+    def delete(self, key, secret):
+        '''
+        delete the group, you must have an id created when calling delete
+        :param key: the key string sent after signup
+        :param secret: the secret string sent after signup
+        :return: status code
+        '''
+        assert self._id is not None
+        return self._step(key=key, secret=secret, params={'id':self._id, 'step': 'delete'})
+
+    def fetch(self, key, secret):
+        '''
+        fetch a watchlist with current symbol prices
+        :param key: the key string sent after signup
+        :param secret: the secret string sent after signup
+        :return: a dataframe object with all symbols and their current prices
+        '''
+        assert self._id is not None
+        return self._step(key=key, secret=secret, params={'id':self._id, 'step': 'fetch'}, method='GET')
+
+
+'''
+managing a watchlist
+'''
 class WatchlistManager(AssetGroup):
     def __init__(self, endpoint):
         super().__init__(endpoint=endpoint, asset_group='watchlist')
 
-    def watchlist_create(self,key, secret):
-        '''
-        create a watchlist AFTER signup , use key and secret sent in the signup email
-        :param key: the key string sent after signup
-        :param secret: the secret string sent after signup
-        :return: watchlist id to be used later for managing the watchlist (add, remove,...)
-        '''
-        self._id, _ = self._step(key=key, secret=secret, params={'step':'create'})
-
-    def watchlist_add(self, key, secret, symbol):
-        '''
-        add a stock to the watchlist, you must have a watchlist id created when calling watchlist create
-        :param watchlist_id: the already created watchlist id
-        :param key: the key string sent after signup
-        :param secret: the secret string sent after signup
-        :param symbol: the symbol to add to the watchlist
-        :return: status code
-        '''
-        return self._step(key=key, secret=secret, params={'watchlist_id':self._id, 'step':'add','symbol':symbol})
-
-    def watchlist_remove(self, key, secret, symbol):
-        '''
-        remove a stock form the watchlist, you must have a watchlist id created when calling watchlist create
-        :param watchlist_id: the already created watchlist id
-        :param key: the key string sent after signup
-        :param secret: the secret string sent after signup
-        :param symbol: the symbol to add to the watchlist
-        :return: status code
-        '''
-        return self._step(key=key, secret=secret, params={'watchlist_id':self._id, 'step': 'remove','symbol':symbol})
-
-    def watchlist_delete(self, key, secret):
-        '''
-        delete the watchlist, you must have a watchlist id created when calling watchlist create
-        :param watchlist_id: the already created watchlist id, this watchlist is deleted (along with any symbols added)
-        :param key: the key string sent after signup
-        :param secret: the secret string sent after signup
-        :return: status code
-        '''
-        return self._step(key=key, secret=secret, params={'watchlist_id':self._id, 'step': 'delete'})
-
-
-    def watchlist_fetch(self, key, secret):
-        '''
-        fetch a watchlist with current symbol prices
-        :param watchlist_id: the already created watchlist id, this watchlist is deleted (along with any symbols added)
-        :param key: the key string sent after signup
-        :param secret: the secret string sent after signup
-        :return: a dataframe object with all symbols and their current prices
-        '''
-        return self._step(key=key, secret=secret, params={'watchlist_id':self._id, 'step': 'fetch'}, method='GET')
-
-
+'''
+managing a portfolio
+'''
 class PortfolioManager(AssetGroup):
     def __init__(self, endpoint):
         super().__init__(endpoint=endpoint, asset_group='portfolio')
 
-    def portfolio_create(self,key, secret):
-        '''
-        create a portfolio AFTER signup , use key and secret sent in the signup email
-        :param key: the key string sent after signup
-        :param secret: the secret string sent after signup
-        :return: portfolio id to be used later for managing the portfolio (add, remove,...)
-        '''
-        self.portfolio_id = self._step(key=key, secret=secret, params={'portfolio_id':self._id, 'step':'create'})
+    def add(self, key, secret, symbol, kwargs=None):
+        assert False, 'quantity missing use add(...,quantity)'
 
-    def portfolio_add(self, key, secret, symbol):
+    def add(self, key, secret, symbol, quantity):
         '''
-        add a stock to the portfolio, you must have a portfolio id created when calling portfolio create
-        :param portfolio_id: the already created portfolio id
+        add a stock to the group, you must have an id created when calling create
         :param key: the key string sent after signup
         :param secret: the secret string sent after signup
-        :param symbol: the symbol to add to the portfolio
+        :param symbol: the symbol to add to the watchlist
         :return: status code
         '''
-        return self._step(key=key, secret=secret, params={'portfolio_id':self._id, 'step':'add','symbol':symbol})
-
-    def portfolio_remove(self, key, secret, symbol):
-        '''
-        remove a stock form the portfolio, you must have a portfolio id created when calling portfolio create
-        :param portfolio_id: the already created portfolio id
-        :param key: the key string sent after signup
-        :param secret: the secret string sent after signup
-        :param symbol: the symbol to add to the portfolio
-        :return: status code
-        '''
-        return self._step(key=key, secret=secret, params={'portfolio_id':self._id, 'step': 'remove','symbol':symbol})
-
-    def portfolio_delete(self, key, secret):
-        '''
-        delete the portfolio, you must have a portfolio id created when calling portfolio create
-        :param portfolio_id: the already created portfolio id, this portfolio is deleted (along with any symbols added)
-        :param key: the key string sent after signup
-        :param secret: the secret string sent after signup
-        :return: status code
-        '''
-        return self._step(key=key, secret=secret, params={'portfolio_id':self._id, 'step': 'delete'})
-
-
-    def portfolio_fetch(self, key, secret):
-        '''
-        fetch a portfolio with current symbol prices
-        :param portfolio_id: the already created portfolio id, this portfolio is deleted (along with any symbols added)
-        :param key: the key string sent after signup
-        :param secret: the secret string sent after signup
-        :return: a dataframe object with all symbols and their current prices
-        '''
-        return self._step(key=key, secret=secret, params={'portfolio_id':self._id, 'step': 'fetch'})
+        return super().add(key=key, secret=secret, symbol=symbol, kwargs={'quantity':quantity})
