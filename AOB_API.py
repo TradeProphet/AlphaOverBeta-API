@@ -118,9 +118,9 @@ class PortfolioManager(AssetGroup):
         super().__init__(endpoint=endpoint, asset_group='portfolio')
 
     def add(self, key, secret, symbol, kwargs=None):
-        assert False, 'quantity missing use add(...,quantity)'
+        assert False, 'quantity or avg_cost missing use add(...,quantity,avg_cost)'
 
-    def add(self, key, secret, symbol, quantity):
+    def add(self, key, secret, symbol, quantity, avg_cost):
         '''
         add a stock to the group, you must have an id created when calling create
         :param key: the key string sent after signup
@@ -128,4 +128,4 @@ class PortfolioManager(AssetGroup):
         :param symbol: the symbol to add to the watchlist
         :return: status code
         '''
-        return super().add(key=key, secret=secret, symbol=symbol, kwargs={'quantity':quantity})
+        return super().add(key=key, secret=secret, symbol=symbol, kwargs={'quantity':quantity, 'avg_cost':avg_cost})
