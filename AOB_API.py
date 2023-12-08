@@ -7,8 +7,8 @@ class AssetGroup:
     def __init__(self, asset_group, endpoint='https://api.alphaoverbeta.net/'):
         '''
         initialize the asset group
-        :param asset_group: string representing the group of assets 'must be the same as the one in the backend
-        :param endpoint: url of endpoint, may be local (testing) alphaoverbeta is the default
+        :param asset_group: string representing the group of assets ,must be the same as the one in the backend
+        :param endpoint: url of endpoint, may be local (testing), alphaoverbeta is the default
         '''
         self.endpoint = endpoint
         self.asset_group = asset_group
@@ -33,7 +33,7 @@ class AssetGroup:
         :param secret: the secret string
         :param params: dictionary containing the values for the endpoint params
         :param method: POST,GET
-        :return: response string and status code (must be 200 for succesfull requests)
+        :return: response string and status code (must be 200 for successful requests)
         '''
         session = requests.Session()
         session.auth = (key, secret)
@@ -94,7 +94,7 @@ class AssetGroup:
 
     def fetch(self, key, secret):
         '''
-        fetch a watchlist with current symbol prices
+        fetch a group with current symbol prices
         :param key: the key string sent after signup
         :param secret: the secret string sent after signup
         :return: a dataframe object with all symbols and their current prices
@@ -120,12 +120,13 @@ class PortfolioManager(AssetGroup):
     def add(self, key, secret, symbol, kwargs=None):
         assert False, 'quantity or avg_cost missing use add(...,quantity,avg_cost)'
 
-    def add(self, key, secret, symbol, quantity, avg_cost):
+    def add(self, key, secret, symbol, quantity):
         '''
-        add a stock to the group, you must have an id created when calling create
+        add a stock to the portfolio, you must have an id created when calling create
         :param key: the key string sent after signup
         :param secret: the secret string sent after signup
-        :param symbol: the symbol to add to the watchlist
+        :param symbol: the symbol to add to the portfolio
+        :param quantity: the symbol's quantity to add to the portfolio
         :return: status code
         '''
-        return super().add(key=key, secret=secret, symbol=symbol, kwargs={'quantity':quantity, 'avg_cost':avg_cost})
+        return super().add(key=key, secret=secret, symbol=symbol, kwargs={'quantity':quantity})
