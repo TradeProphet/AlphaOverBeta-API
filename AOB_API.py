@@ -1,4 +1,7 @@
 import requests
+import json
+import pandas as pd
+
 
 '''
 an asset group is the interface class for any group of assets (watchlist, portfolio,...)
@@ -100,7 +103,8 @@ class AssetGroup:
         :return: a dataframe object with all symbols and their current prices
         '''
         assert self._id is not None
-        return self._step(key=key, secret=secret, params={'id':self._id, 'step': 'fetch'}, method='GET')
+        df, status_code = self._step(key=key, secret=secret, params={'id':self._id, 'step': 'fetch'}, method='GET')
+        return pd.DataFrame(json.loads(df)), status_code
 
 
 '''
@@ -130,3 +134,7 @@ class PortfolioManager(AssetGroup):
         :return: status code
         '''
         return super().add(key=key, secret=secret, symbol=symbol, kwargs={'quantity':quantity})
+
+    def backtest(self, key, secret, id, period, interval):
+        df, status_code = self._step(key=key, secret=secret, params={'step':'backtest', 'id':id, 'period':period, 'interval':interval})
+        return pd.DataFrame(json.loads(df)), status_code
