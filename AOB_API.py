@@ -7,7 +7,7 @@ import pandas as pd
 an asset group is the interface class for any group of assets (watchlist, portfolio,...)
 '''
 class AssetGroup:
-    def __init__(self, asset_group, endpoint='https://api.alphaoverbeta.net/'):
+    def __init__(self, asset_group, id, endpoint='https://api.alphaoverbeta.net/'):
         '''
         initialize the asset group
         :param asset_group: string representing the group of assets ,must be the same as the one in the backend
@@ -15,7 +15,7 @@ class AssetGroup:
         '''
         self.endpoint = endpoint
         self.asset_group = asset_group
-        self._id = None
+        self._id = id
 
     def signup(self, email):
         '''
@@ -68,7 +68,7 @@ class AssetGroup:
         :param symbol: the symbol to add to the watchlist
         :return: status code
         '''
-        assert self._id is not None
+        assert self._id is not None, 'use create() first'
         params = {'id': self._id, 'step': 'add', 'symbol': symbol}
         if kwargs is not None:
             params.update(kwargs)
@@ -111,15 +111,15 @@ class AssetGroup:
 managing a watchlist
 '''
 class WatchlistManager(AssetGroup):
-    def __init__(self, endpoint):
-        super().__init__(endpoint=endpoint, asset_group='watchlist')
+    def __init__(self, endpoint, id=None):
+        super().__init__(endpoint=endpoint, id=id, asset_group='watchlist')
 
 '''
 managing a portfolio
 '''
 class PortfolioManager(AssetGroup):
-    def __init__(self, endpoint):
-        super().__init__(endpoint=endpoint, asset_group='portfolio')
+    def __init__(self, endpoint, id=None):
+        super().__init__(endpoint=endpoint, id=id, asset_group='portfolio')
 
     def add(self, key, secret, symbol, kwargs=None):
         assert False, 'quantity or avg_cost missing use add(...,quantity,avg_cost)'
