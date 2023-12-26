@@ -16,9 +16,9 @@ if __name__ == '__main__':
         portfolio_api.create()
 
         # add symbols to the portfolio
-        portfolio_api.add(symbol='SPY', quantity=50)
-        portfolio_api.add(symbol='BND', quantity=200)
-        portfolio_api.add(symbol='SH', quantity=200)
+        portfolio_api.add_quantity(symbol='SPY', quantity=50)
+        portfolio_api.add_quantity(symbol='BND', quantity=200)
+        portfolio_api.add_quantity(symbol='SH', quantity=200)
 
         # run a backtest on the symbols added before with the requested period and the requested time interval
         bt_df, status_code = portfolio_api.backtest(period='5y', interval='1d')

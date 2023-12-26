@@ -3,14 +3,14 @@ import json
 import pandas as pd
 
 
-def signup(email):
+def signup(email, endpoint=None):
     '''
     signup to the service by providing email, the API key and secret are sent to the requested email
     on initial signup only! , subsequent requests to signup with the same email are ignored
     :param email: the signup email address (for ex. home@network.com)
     :return: status code
     '''
-    endpoint = 'https://api.alphaoverbeta.net/'
+    endpoint = endpoint if endpoint is not None else 'https://api.alphaoverbeta.net/'
     url = endpoint + '/signup?email={}'.format(email)
     r = requests.post(url=url)
 
@@ -84,7 +84,7 @@ class AssetGroup:
         assert self._id is not None
         return self._step(params={'id':self._id, 'step': 'remove','symbol':symbol})
 
-    def delete(self, key, secret):
+    def delete(self):
         '''
         delete the group, you must have an id created when calling delete
         :return: status code
@@ -119,7 +119,7 @@ class PortfolioManager(AssetGroup):
     def add(self, symbol, kwargs=None):
         assert False, 'quantity or avg_cost missing use add(...,quantity)'
 
-    def add(self, symbol, quantity):
+    def add_quantity(self, symbol, quantity):
         '''
         add a stock to the portfolio, you must have an id created when calling create
         :param symbol: the symbol to add to the portfolio
@@ -127,6 +127,15 @@ class PortfolioManager(AssetGroup):
         :return: status code
         '''
         return super().add(symbol=symbol, kwargs={'quantity':quantity})
+
+    def add_cost(self, symbol, cost):
+        '''
+        add a stock to the portfolio, you must have an id created when calling create
+        :param symbol: the symbol to add to the portfolio
+        :param cost: the symbol's cost basis in absolute $ units, add to the portfolio
+        :return: status code
+        '''
+        return super().add(symbol=symbol, kwargs={'cost':cost})
 
     def backtest(self, period, interval):
         df, status_code = self._step(params={'step':'backtest', 'id':self._id, 'period':period, 'interval':interval})
