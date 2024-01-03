@@ -1,4 +1,4 @@
-import sys, os
+import sys, logging
 from pathlib import Path
 from numpy import arange
 
@@ -6,6 +6,8 @@ sys.path.append('..')
 from AOB_API import PortfolioManager
 import ffn
 import pandas as pd
+
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
 if __name__ == '__main__':

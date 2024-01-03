@@ -1,10 +1,13 @@
-import sys, os
+import sys, logging
 sys.path.append('..')
 from AOB_API import PortfolioManager
 import ffn
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
+
+
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
 if __name__ == '__main__':

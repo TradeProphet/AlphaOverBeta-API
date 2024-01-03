@@ -17,6 +17,28 @@ def signup(email, endpoint=None):
     return r.status_code
 
 
+def aob_request(params, method, key, secret, endpoint, request_rule):
+    '''
+    internal method executing the request to the backend
+    :param params: dictionary containing the values for the endpoint params
+    :param method: POST,GET
+    :return: response string and status code (must be 200 for successful requests)
+    '''
+    assert all([key, secret])
+    session = requests.Session()
+    session.auth = (key, secret)
+    _params = ''
+    for k in params.keys():
+        _params += '{}={}&'.format(k, params[k])
+    url = '{}/{}?{}'.format(endpoint, request_rule, _params[:-1])
+    if 'POST' == method:
+        r = session.post(url=url)
+    else:
+        r = session.get(url=url)
+
+    return r.text, r.status_code
+
+
 class AssetGroup:
     def __init__(self, asset_group, id, key, secret, endpoint=None):
         '''
@@ -40,19 +62,7 @@ class AssetGroup:
         :param method: POST,GET
         :return: response string and status code (must be 200 for successful requests)
         '''
-        assert all([self.key, self.secret])
-        session = requests.Session()
-        session.auth = (self.key, self.secret)
-        _params = ''
-        for k in params.keys():
-            _params += '{}={}&'.format(k, params[k])
-        url = '{}/{}?{}'.format(self.endpoint, self.asset_group, _params[:-1])
-        if 'POST' == method:
-            r = session.post(url=url)
-        else:
-            r = session.get(url=url)
-
-        return r.text, r.status_code
+        return aob_request(params=params, method=method,key=self.key,secret=self.secret,endpoint=self.endpoint,request_rule=self.asset_group)
 
     def create(self):
         '''
@@ -140,3 +150,12 @@ class PortfolioManager(AssetGroup):
     def backtest(self, period, interval):
         df, status_code = self._step(params={'step':'backtest', 'id':self._id, 'period':period, 'interval':interval})
         return pd.DataFrame(json.loads(df)), status_code
+
+'''
+    Support / Resistance
+'''
+def Support(symbol, interval, last, key, secret, endpoint='https://api.alphaoverbeta.net/'):
+    params = {'symbol':symbol, 'interval':interval}
+    if last:
+        params.update({'last': 'yes'})
+    return aob_request(params=params,method='GET',key=key,secret=secret,endpoint=endpoint,request_rule='support')
