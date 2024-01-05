@@ -154,8 +154,17 @@ class PortfolioManager(AssetGroup):
 '''
     Support / Resistance
 '''
-def Support(symbol, interval, last, key, secret, endpoint='https://api.alphaoverbeta.net/'):
-    params = {'symbol':symbol, 'interval':interval}
+def Support(symbol, period, interval, last, key, secret, endpoint='https://api.alphaoverbeta.net/'):
+    params = {'symbol':symbol, 'period':period, 'interval':interval}
     if last:
         params.update({'last': 'yes'})
-    return aob_request(params=params,method='GET',key=key,secret=secret,endpoint=endpoint,request_rule='support')
+
+    support_d, status_code = aob_request(params=params,method='GET',key=key,secret=secret,endpoint=endpoint,request_rule='support')
+
+    if 200 == status_code:
+        if last:
+            return float(support_d), status_code
+        else:
+            return json.loads(support_d), status_code
+
+    return support_d, status_code
