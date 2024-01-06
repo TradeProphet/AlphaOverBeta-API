@@ -155,6 +155,17 @@ class PortfolioManager(AssetGroup):
     Support / Resistance
 '''
 def Support(symbol, period, interval, last, key, secret, endpoint='https://api.alphaoverbeta.net/'):
+    '''
+    return support areas for a given asset
+    :param symbol: the requested symbol
+    :param period: time period to analyze, Valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
+    :param interval: candle bar size, Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
+    :param last: return only most relevant support if True, return all support areas if False
+    :param key: sey string received on signup
+    :param secret: secret string received on signup
+    :param endpoint: requested endpoint
+    :return: a dictionary containing the support areas and their relevant strength, or only one most relevant support
+    '''
     params = {'symbol':symbol, 'period':period, 'interval':interval}
     if last:
         params.update({'last': 'yes'})
@@ -163,8 +174,10 @@ def Support(symbol, period, interval, last, key, secret, endpoint='https://api.a
 
     if 200 == status_code:
         if last:
+            # return only one value
             return float(support_d), status_code
         else:
+            # return a dictionary containing the values
             return json.loads(support_d), status_code
 
     return support_d, status_code
