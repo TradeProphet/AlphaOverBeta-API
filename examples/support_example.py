@@ -11,16 +11,16 @@ def plot_support(quotes, support ,name):
     hlines = [float(k) for k in support.keys() if support[k] > 2]
     apds = []
     mpf.plot(quotes, style='charles', type='candlestick', figsize=(16, 8), title=name,
-             warn_too_much_data=len(quotes) + 1, returnfig=True, savefig='imgs/{}_sr.png'.format(name),
+             warn_too_much_data=len(quotes) + 1, returnfig=True, savefig='{}_sr.png'.format(name),
              show_nontrading=False, addplot=apds,
-             volume=True, hlines=dict(hlines=hlines, colors=['g'], linewidths=(0.5), linestyle='--'))
+             volume=True, hlines=dict(hlines=hlines, colors=['g'], linewidths=(1.5), linestyle='--'))
 
 
 if __name__ == '__main__':
     try:
         # use the support api to calculate the entire support areas for the requested period
         # the return value is a dictionary indicating the strength of each support level
-        symbol = 'NFLX'
+        symbol = 'TSLA'
         period = '3mo'
         interval = '1h'
         support_d, status_code = Support(symbol=symbol, period=period, interval=interval, key='DEMO', secret='DEMO', last=False)
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         # plot
         ticker = yf.Ticker(symbol)
         quotes = ticker.history(period=period, interval=interval, prepost=False)
-        plot_support(quotes=quotes, support=support_d, name=symbol)
+        plot_support(quotes=quotes, support=support_d, name='{}, {}, {}'.format(symbol, period, interval))
 
     except Exception as e:
         print(str(e))
