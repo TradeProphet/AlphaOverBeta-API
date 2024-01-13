@@ -152,7 +152,7 @@ class PortfolioManager(AssetGroup):
         return pd.DataFrame(json.loads(df)), status_code
 
 '''
-    Support / Resistance
+    Support
 '''
 def Support(symbol, period, interval, last, key, secret, endpoint='https://api.alphaoverbeta.net/'):
     '''
@@ -166,11 +166,11 @@ def Support(symbol, period, interval, last, key, secret, endpoint='https://api.a
     :param endpoint: requested endpoint
     :return: a dictionary containing the support areas and their relevant strength, or only one most relevant support
     '''
-    params = {'symbol':symbol, 'period':period, 'interval':interval}
+    params = {'step':'support', 'symbol':symbol, 'period':period, 'interval':interval}
     if last:
         params.update({'last': 'yes'})
 
-    support_d, status_code = aob_request(params=params,method='GET',key=key,secret=secret,endpoint=endpoint,request_rule='support')
+    support_d, status_code = aob_request(params=params,method='GET',key=key,secret=secret,endpoint=endpoint,request_rule='patterns')
 
     if 200 == status_code:
         if last:
@@ -178,6 +178,9 @@ def Support(symbol, period, interval, last, key, secret, endpoint='https://api.a
             return float(support_d), status_code
         else:
             # return a dictionary containing the values
-            return json.loads(support_d), status_code
+            req_d, _d = json.loads(support_d), {}
+            for k in req_d.keys():
+                _d[float(k)] = float(req_d[k])
+            return _d, status_code
 
     return support_d, status_code
